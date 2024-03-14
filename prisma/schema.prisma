@@ -1,15 +1,14 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider     = "mysql"
-  url          = env("DATABASE_URL")
-  relationMode = "prisma"
-}
-
 model User {
-  id       Int      @id @default(autoincrement())
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
   username String   @unique
   email    String   @unique
   password String
@@ -18,35 +17,45 @@ model User {
 }
 
 model Teacher {
-  id           Int            @id @default(autoincrement())
-  userId       Int            @unique
+  id           String         @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String         @unique @db.ObjectId
   user         User           @relation(fields: [userId], references: [id])
-  classes      Class[]        @relation("TeacherClasses")
-  TeacherClass TeacherClass[]
+  classTeacher ClassTeacher[]
+  appointments Appointment[]
 }
 
 model Student {
-  id      Int   @id @default(autoincrement())
-  userId  Int   @unique
-  user    User  @relation(fields: [userId], references: [id])
-  class   Class @relation(fields: [classId], references: [id])
-  classId Int
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  userId  String @unique @db.ObjectId
+  user    User   @relation(fields: [userId], references: [id])
+  class   Class  @relation(fields: [classId], references: [id])
+  classId String @db.ObjectId
 
   @@index([classId])
 }
 
 model Class {
-  id           Int            @id @default(autoincrement())
-  name         String
-  teachers     Teacher[]      @relation("TeacherClasses")
-  lessons      Lesson[]
-  Student      Student[]
-  TeacherClass TeacherClass[]
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  classTeacher  ClassTeacher[]
+  lessons       Lesson[]
+  students      Student[]
 }
 
+model ClassTeacher {
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  classId    String @db.ObjectId
+  teacherId  String @db.ObjectId
+  class      Class  @relation(fields: [classId], references: [id])
+  teacher    Teacher @relation(fields: [teacherId], references: [id])
+
+  @@unique([classId, teacherId])
+}
+
+
 model Lesson {
-  id            Int      @id @default(autoincrement())
-  classId       Int
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  classId       String @db.ObjectId
   title         String
   start_time    DateTime
   end_time      DateTime
@@ -54,24 +63,14 @@ model Lesson {
   public_notes  String
   private_notes String
   Files         File[]
-  Classes       Class    @relation(fields: [classId], references: [id])
+  Classes       Class  @relation(fields: [classId], references: [id])
 
   @@index([classId])
 }
 
-model TeacherClass {
-  teacher   Teacher @relation(fields: [teacherId], references: [id])
-  teacherId Int
-  class     Class   @relation(fields: [classId], references: [id])
-  classId   Int
-
-  @@id([teacherId, classId])
-  @@index([teacherId, classId])
-}
-
 model File {
-  id          Int     @id @default(autoincrement())
-  lesson_id   Int
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  lesson_id   String @db.ObjectId
   file_name   String
   file_path   String
   file_type   String
@@ -80,4 +79,16 @@ model File {
   lesson      Lesson  @relation(fields: [lesson_id], references: [id])
 
   @@index([lesson_id])
+}
+
+model Appointment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  teacherId String @db.ObjectId
+  title     String
+  start_time DateTime
+  end_time   DateTime
+  notes     String?
+  teacher   Teacher  @relation(fields: [teacherId], references: [id])
+
+  @@index([teacherId])
 }
