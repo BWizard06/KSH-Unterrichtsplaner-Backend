@@ -22,6 +22,7 @@ model Teacher {
   user         User           @relation(fields: [userId], references: [id])
   classTeacher ClassTeacher[]
   appointments Appointment[]
+  lessons      Lesson[]
 }
 
 model Student {
@@ -56,29 +57,30 @@ model ClassTeacher {
 model Lesson {
   id            String @id @default(auto()) @map("_id") @db.ObjectId
   classId       String @db.ObjectId
+  teacherId     String @db.ObjectId
   title         String
   start_time    DateTime
   end_time      DateTime
   room          String
-  public_notes  String
-  private_notes String
+  public_notes  String?
+  private_notes String?
   Files         File[]
   Classes       Class  @relation(fields: [classId], references: [id])
+  Teacher       Teacher @relation(fields: [teacherId], references: [id])
 
-  @@index([classId])
+  @@index([classId, teacherId])
 }
 
 model File {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  lesson_id   String @db.ObjectId
+  lessonId   String @db.ObjectId
   file_name   String
-  file_path   String
-  file_type   String
+  file_type   String?
   binary_file Bytes
   visibility  Boolean
-  lesson      Lesson  @relation(fields: [lesson_id], references: [id])
+  lesson      Lesson  @relation(fields: [lessonId], references: [id])
 
-  @@index([lesson_id])
+  @@index([lessonId])
 }
 
 model Appointment {
