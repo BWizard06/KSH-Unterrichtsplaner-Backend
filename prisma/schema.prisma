@@ -37,7 +37,7 @@ model Student {
 
 model Class {
   id            String         @id @default(auto()) @map("_id") @db.ObjectId
-  name          String
+  name          String         @unique
   classTeacher  ClassTeacher[]
   lessons       Lesson[]
   students      Student[]
@@ -64,9 +64,9 @@ model Lesson {
   room          String
   public_notes  String?
   private_notes String?
-  Files         File[]
-  Classes       Class  @relation(fields: [classId], references: [id])
-  Teacher       Teacher @relation(fields: [teacherId], references: [id])
+  files         File[]
+  class        Class  @relation(fields: [classId], references: [id])
+  teacher      Teacher @relation(fields: [teacherId], references: [id])
 
   @@index([classId, teacherId])
 }

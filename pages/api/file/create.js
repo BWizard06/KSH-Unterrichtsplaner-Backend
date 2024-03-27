@@ -15,7 +15,6 @@ export default function handler(req, res) {
     if (req.method !== "POST") {
         return res.status(405).end(`Method ${req.method} not allowed`);
     }
-    console.log("req.body", req.body);
 
     upload(req, res, async (error) => {
         if (error instanceof multer.MulterError) {
@@ -54,8 +53,8 @@ export default function handler(req, res) {
                     lessonId,
                     file_name: req.file.originalname,
                     file_type: req.file.mimetype,
-                    binary_file: req.file.buffer, 
-                    visibility
+                    binary_file: req.file.buffer,
+                    visibility,
                 },
             });
 
